@@ -51,5 +51,9 @@ plot_menciones<-ggplot(data=data_cons[-1,], aes(x=hora, y=n_tweets))+
   xlab('Hora')+
   ggtitle('Número de menciones por minuto', subtitle = 'Gris:Número de menciones total \n Marrón:@lopezobrador_ \n Rojo:@JoseAMeadeK \n Azul:@RicardoAnayaC \n Violeta:@Mzavalagc \n Azul marino:@JaimeRdzNL')
 ggsave(path = getwd(),device = 'png',plot =  plot_menciones,filename = 'plot_menciones.png')
+system(paste0('open ', getwd(), '/plot_menciones.png'))
+system('git add .')
+system("git commit -m 'Actualiación' ")
+system("git push origin master")
 }
 }
