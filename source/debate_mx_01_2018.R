@@ -1,10 +1,11 @@
 rm(list=ls())
 setwd('~')
-wd<-list.dirs(path = 'Documents', full.names = T)[172]
+wd<-list.dirs(path = 'Documents', full.names = T)[grep('debate', list.dirs(path = 'Documents', full.names = T))][1]
 setwd(wd)
 tokens<-read.csv('./source/tokens.csv', stringsAsFactors = F)
 
 library(rtweet)
+library(data.table)
 
 Sys.setenv(TZ='America/Mexico_City')
 token_1<-create_token(app = tokens$app[1],
@@ -17,9 +18,9 @@ data_cons<-data.table(hora=.POSIXct(Sys.time(), 'America/Mexico_City'), n_tweets
                       n_meade=NA, n_anaya=NA, n_bronco=NA, n_maza=NA)
 data_i<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
                       n_meade=NA, n_anaya=NA, n_bronco=NA, n_maza=NA)
-horas<-8
+horas<-4
 
-for(i in 1:60*horas){
+for(i in 1:(60*horas)){
   if(i %% 60==0) {
   message(paste('Ya son las', Sys.time()))
   }
