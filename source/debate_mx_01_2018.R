@@ -18,7 +18,7 @@ data_cons<-data.table(hora=.POSIXct(Sys.time(), 'America/Mexico_City'), n_tweets
 data_i<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
                       n_meade=NA, n_anaya=NA, n_bronco=NA, n_maza=NA)
 
-for(i in 1:10){
+for(i in 1:120){
 data<-stream_tweets(
   "@lopezobrador_, @JoseAMeadeK, @JaimeRdzNL, @RicardoAnayaC, @Mzavalagc",
   timeout = 60,
