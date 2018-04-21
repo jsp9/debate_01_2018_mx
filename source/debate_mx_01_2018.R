@@ -17,8 +17,12 @@ data_cons<-data.table(hora=.POSIXct(Sys.time(), 'America/Mexico_City'), n_tweets
                       n_meade=NA, n_anaya=NA, n_bronco=NA, n_maza=NA)
 data_i<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
                       n_meade=NA, n_anaya=NA, n_bronco=NA, n_maza=NA)
+horas<-8
 
-for(i in 1:120){
+for(i in 1:60*horas){
+  if(i %% 60==0) {
+  message(paste('Ya son las', Sys.time()))
+  }
 data<-stream_tweets(
   "@lopezobrador_, @JoseAMeadeK, @JaimeRdzNL, @RicardoAnayaC, @Mzavalagc",
   timeout = 60,
@@ -51,7 +55,7 @@ plot_menciones<-ggplot(data=data_cons[-1,], aes(x=hora, y=n_tweets))+
   xlab('Hora')+
   ggtitle('Número de menciones por minuto', subtitle = 'Gris:Número de menciones total \n Marrón:@lopezobrador_ \n Rojo:@JoseAMeadeK \n Azul:@RicardoAnayaC \n Violeta:@Mzavalagc \n Azul marino:@JaimeRdzNL')
 ggsave(path = getwd(),device = 'png',plot =  plot_menciones,filename = 'plot_menciones.png')
-system(paste0('open ', getwd(), '/plot_menciones.png'))
+#system(paste0('open ', getwd(), '/plot_menciones.png'))
 system('git add .')
 system("git commit -m 'Actualiación' ")
 system("git push origin master")
