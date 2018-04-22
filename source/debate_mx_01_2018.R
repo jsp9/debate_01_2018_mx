@@ -96,7 +96,7 @@ data_i_nort<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
 
 pals_5min<-NULL
 
-actualiza_git<-F
+actualiza_git<-T
 horas<-4
 
 
@@ -122,7 +122,7 @@ data_i$n_bronco<-sum(unlist(lapply(data$mentions_screen_name, function(x) sum(gr
 data_cons<-rbind(data_cons, data_i)
 
 #####NO RTS#####
-data_nort<-data[data$is_retweet==F,]
+data_nort<-data[data$is_retweet==T,]
 
 data_i_nort$hora<-.POSIXct(Sys.time(), 'America/Mexico_City')
 data_i_nort$n_tweets<-nrow(data_nort)
@@ -151,7 +151,7 @@ if (i %%5 ==0){
   
   
   pal<-lapply(pal, procesa_corpus)
-  names(pal)<-c('amlo', 'meade', 'bronco', 'anaya', 'margarita')
+  names(pal)<-c('total', 'amlo', 'meade','anaya', 'bronco', 'margarita')
   
   pals_5min<-NULL
   plots_wd<-list()
@@ -159,10 +159,12 @@ if (i %%5 ==0){
   pal[[i]]$word<-factor(pal[[i]]$word,
                         levels = pal[[i]]$word[order(pal[[i]]$freq,
                                                      decreasing = F)])
-  plots_wd[[i]]<-ggplot(data=pal[[i]][pal[[i]]$freq>quantile(pal[[i]]$freq, 0.90),], aes(x=word, y=freq))+
+  plots_wd[[i]]<-ggplot(data=pal[[i]][pal[[i]]$freq>quantile(pal[[i]]$freq, 0.97),], aes(x=word, y=freq))+
     geom_bar(stat = 'identity')+
     coord_flip()+
-    theme_light()
+    theme_light()+
+    xlab('')+
+    ylab('')
   }
 ggsave( filename = 'palabras_5mn.png',device = 'png',plot = 
             do.call(multiplot, c(plots_wd, cols=2)))  
