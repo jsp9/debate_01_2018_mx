@@ -12,7 +12,7 @@ library(rtweet)
 library(data.table)
 library(ggplot2)
 library(tm)
-
+library(ggrepel)
 procesa_corpus<-function(obj){
   corpus<-Corpus(VectorSource(obj))
   corpus <- tm_map(corpus, removeWords, c('lopezobrador_',
@@ -79,9 +79,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 
 
 Sys.setenv(TZ='America/Mexico_City')
-token_1<-create_token(app = tokens$app[1],
-                    consumer_key = tokens$consumer_key[1], 
-                    consumer_secret = tokens$consumer_secret[1])
+#token_1<-create_token(app = tokens$app[1],
+#                    consumer_key = tokens$consumer_key[1], 
+#                    consumer_secret = tokens$consumer_secret[1])
 
 
 data<-NULL
@@ -98,11 +98,11 @@ data_i_nort<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
 pals_5min<-NULL
 
 actualiza_git<-T
-horas<-4
+horas<-1
 
 
 #1:(60*horas)
-for(i in 1:5){
+for(i in 1:(60*horas)){
   if(i %% 60==0) {
   message(paste('Ya son las', Sys.time()))
   }
@@ -159,7 +159,7 @@ if (i %%5 ==0){
   pal[[a]]$word<-factor(pal[[a]]$word,
                         levels = pal[[a]]$word[order(pal[[a]]$freq,
                                                      decreasing = F)])
-  plots_wd[[a]]<-ggplot(data=pal[[a]][pal[[a]]$freq>quantile(pal[[a]]$freq, 0.99),], aes(x=word, y=freq))+
+  plots_wd[[a]]<-ggplot(data=pal[[a]][pal[[a]]$freq>quantile(pal[[a]]$freq, 0.95),], aes(x=word, y=freq))+
     geom_bar(stat = 'identity')+
     coord_flip()+
     theme_light()+
@@ -174,11 +174,18 @@ ggsave( filename = 'palabras_5mn.png',device = 'png',plot =
   
 plot_menciones<-ggplot(data=data_cons[-1,], aes(x=hora, y=n_tweets))+
   geom_line(color='grey')+
+  
   geom_line(aes(x=hora, y=n_amlo), color='#AC2C2C')+
   geom_line(aes(x=hora, y=n_meade), color='red')+
   geom_line(aes(x=hora, y=n_anaya), color='blue')+
   geom_line(aes(x=hora, y=n_bronco), color='#2D3672')+
   geom_line(aes(x=hora, y=n_maza), color='#B917BF')+
+  geom_text_repel(data=data_cons[nrow(data_cons),], aes(x=hora, y=n_tweets, label=n_tweets))+
+  geom_text_repel(data=data_cons[nrow(data_cons),], aes(x=hora, y=n_amlo, label=n_amlo))+
+  geom_text_repel(data=data_cons[nrow(data_cons),], aes(x=hora, y=n_bronco, label=n_bronco))+
+  geom_text_repel(data=data_cons[nrow(data_cons),], aes(x=hora, y=n_meade, label=n_meade))+
+  geom_text_repel(data=data_cons[nrow(data_cons),], aes(x=hora, y=n_anaya, label=n_anaya))+
+  geom_text_repel(data=data_cons[nrow(data_cons),], aes(x=hora, y=n_maza, label=n_maza))+
   theme_light()+
   ylab('Número de menciones')+
   xlab('Hora')+
@@ -204,6 +211,12 @@ plot_menciones_nort<-ggplot(data=data_cons_nort[-1,], aes(x=hora, y=n_tweets))+
   geom_line(aes(x=hora, y=n_anaya), color='blue')+
   geom_line(aes(x=hora, y=n_bronco), color='#2D3672')+
   geom_line(aes(x=hora, y=n_maza), color='#B917BF')+
+  geom_text_repel(data=data_cons_nort[nrow(data_cons_nort),], aes(x=hora, y=n_amlo, label=n_amlo))+
+  geom_text_repel(data=data_cons_nort[nrow(data_cons_nort),], aes(x=hora, y=n_bronco, label=n_bronco))+
+  geom_text_repel(data=data_cons_nort[nrow(data_cons_nort),], aes(x=hora, y=n_meade, label=n_meade))+
+  geom_text_repel(data=data_cons_nort[nrow(data_cons_nort),], aes(x=hora, y=n_anaya, label=n_anaya))+
+  geom_text_repel(data=data_cons_nort[nrow(data_cons_nort),], aes(x=hora, y=n_maza, label=n_maza))+
+  geom_text_repel(data=data_cons_nort[nrow(data_cons_nort),], aes(x=hora, y=n_tweets, label=n_tweets))+
   theme_light()+
   ylab('Número de menciones')+
   xlab('Hora')+
@@ -246,6 +259,11 @@ plot_menciones_nort_porc<-ggplot(data=data_cons_cumsum, aes(x=hora, y=n_amlo))+
   geom_line(aes(x=hora, y=n_anaya), color='blue')+
   geom_line(aes(x=hora, y=n_bronco), color='#2D3672')+
   geom_line(aes(x=hora, y=n_maza), color='#B917BF')+
+  geom_text_repel(data=data_cons_cumsum[nrow(data_cons_cumsum),], aes(x=hora, y=n_amlo, label=n_amlo))+
+  geom_text_repel(data=data_cons_cumsum[nrow(data_cons_cumsum),], aes(x=hora, y=n_bronco, label=n_bronco))+
+  geom_text_repel(data=data_cons_cumsum[nrow(data_cons_cumsum),], aes(x=hora, y=n_meade, label=n_meade))+
+  geom_text_repel(data=data_cons_cumsum[nrow(data_cons_cumsum),], aes(x=hora, y=n_anaya, label=n_anaya))+
+  geom_text_repel(data=data_cons_cumsum[nrow(data_cons_cumsum),], aes(x=hora, y=n_maza, label=n_maza))+
   theme_light()+
   ylab('% acumulado de menciones')+
   xlab('Hora')+
