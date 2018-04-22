@@ -13,6 +13,7 @@
 
 
 ## Palabras más utilizadas en los tweets de los últimos 5 minutos por menciones
-### Columna izquierda (de arriba a abajo )
+### Columna izquierda (de arriba a abajo): Menciones de AMLO, Meade, Anaya)
+### Columna derecha: Zavala y Rodríguez
 
 ![alt text](https://github.com/jsp9/debate_01_2018_mx/blob/master/palabras_5mn.png)

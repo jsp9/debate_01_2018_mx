@@ -101,7 +101,7 @@ horas<-4
 
 
 #1:(60*horas)
-for(i in 1:10){
+for(i in 1:5){
   if(i %% 60==0) {
   message(paste('Ya son las', Sys.time()))
   }
@@ -109,7 +109,7 @@ data<-stream_tweets(
   "@lopezobrador_, @JoseAMeadeK, @JaimeRdzNL, @RicardoAnayaC, @Mzavalagc",
   timeout = 60,
   file_name = 'PRUEBA.json',
-  parse = TRUE, verbose = T)
+  parse = TRUE, verbose = F)
 write_as_csv(data, paste0('./data/tw_', i,'.csv'))
 #####RESUMEN#####
 data_i$hora<-.POSIXct(Sys.time(), 'America/Mexico_City')
@@ -145,26 +145,26 @@ if (i %%5 ==0){
   pal_bronco<-paste(pals_5min[grepl('JaimeRdzNL', pals_5min)], collapse = ' ')
   pal_anaya<-paste(pals_5min[grepl('RicardoAnayaC', pals_5min)], collapse = ' ')
   pal_maza<-paste(pals_5min[grepl('Mzavalagc', pals_5min)], collapse = ' ')
-  pal_gral<-paste(pals_5min, collapse = ' ')
-  
-  pal<-list(pal_gral, pal_amlo, pal_meade, pal_anaya, pal_bronco, pal_maza )
+
+  pal<-list(pal_amlo, pal_meade, pal_anaya, pal_bronco, pal_maza )
   
   
   pal<-lapply(pal, procesa_corpus)
-  names(pal)<-c('total', 'amlo', 'meade','anaya', 'bronco', 'margarita')
+  names(pal)<-c('amlo', 'meade','anaya', 'bronco', 'margarita')
   
   pals_5min<-NULL
   plots_wd<-list()
-  for (i in 1:length(pal)){
-  pal[[i]]$word<-factor(pal[[i]]$word,
-                        levels = pal[[i]]$word[order(pal[[i]]$freq,
+  for (a in 1:length(pal)){
+  pal[[a]]$word<-factor(pal[[a]]$word,
+                        levels = pal[[a]]$word[order(pal[[a]]$freq,
                                                      decreasing = F)])
-  plots_wd[[i]]<-ggplot(data=pal[[i]][pal[[i]]$freq>quantile(pal[[i]]$freq, 0.97),], aes(x=word, y=freq))+
+  plots_wd[[a]]<-ggplot(data=pal[[a]][pal[[a]]$freq>quantile(pal[[a]]$freq, 0.97),], aes(x=word, y=freq))+
     geom_bar(stat = 'identity')+
     coord_flip()+
     theme_light()+
     xlab('')+
-    ylab('')
+    ylab('')+
+    ggtitle(paste('Corte de las ', Sys.time() ))
   }
 ggsave( filename = 'palabras_5mn.png',device = 'png',plot = 
             do.call(multiplot, c(plots_wd, cols=2)))  
