@@ -4,9 +4,78 @@ wd<-list.dirs(path = 'Documents', full.names = T)[grep('debate', list.dirs(path 
 setwd(wd)
 tokens<-read.csv('./source/tokens.csv', stringsAsFactors = F)
 
+
+
+
+
 library(rtweet)
 library(data.table)
 library(ggplot2)
+library(tm)
+
+procesa_corpus<-function(obj){
+  corpus<-Corpus(VectorSource(obj))
+  corpus <- tm_map(corpus, removeWords, c('lopezobrador_',
+                                          'JoseAMeadeK',
+                                          'JaimeRdzNL',
+                                          'RicardoAnayaC',
+                                          'Mzavalagc'))
+  
+  
+  corpus<-tm_map(corpus, content_transformer(tolower))
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, PlainTextDocument)
+  
+  
+  
+  corpus <- tm_map(corpus, removeWords, stopwords(kind='es'))
+  
+  
+  
+  #corpus<-tm_map(corpus, stemDocument)
+  
+  m<-as.matrix(TermDocumentMatrix(corpus))
+  v<-sort(rowSums(m),decreasing=TRUE)
+  corpus <- data.frame(word = names(v),freq=v)
+  return(corpus)
+}
+
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+  
+  if (numPlots==1) {
+    print(plots[[1]])
+    
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+    
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
 
 Sys.setenv(TZ='America/Mexico_City')
 token_1<-create_token(app = tokens$app[1],
@@ -25,10 +94,14 @@ data_i<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
 data_i_nort<-data.table(hora=NA, n_tweets=NA, n_amlo=NA,
                    n_meade=NA, n_anaya=NA, n_bronco=NA, n_maza=NA)
 
+pals_5min<-NULL
 
+actualiza_git<-F
 horas<-4
+
+
 #1:(60*horas)
-for(i in 1:5){
+for(i in 1:10){
   if(i %% 60==0) {
   message(paste('Ya son las', Sys.time()))
   }
@@ -60,9 +133,40 @@ data_i_nort$n_maza<-sum(unlist(lapply(data_nort$mentions_screen_name, function(x
 data_i_nort$n_bronco<-sum(unlist(lapply(data_nort$mentions_screen_name, function(x) sum(grepl("JaimeRdzNL", x)))))
 data_cons_nort<-rbind(data_cons_nort, data_i_nort)
 
+pals_5min<-c(data_nort$text, pals_5min)
+
+
+
 #############plotea menciones cadaa 5 minutos#########
 ######Grafica con rt########
 if (i %%5 ==0){
+  pal_amlo<-paste(pals_5min[grepl('lopezobrador_', pals_5min )], collapse = ' ')
+  pal_meade<-paste(pals_5min[grepl('JoseAMeadeK', pals_5min)], collapse = ' ')
+  pal_bronco<-paste(pals_5min[grepl('JaimeRdzNL', pals_5min)], collapse = ' ')
+  pal_anaya<-paste(pals_5min[grepl('RicardoAnayaC', pals_5min)], collapse = ' ')
+  pal_maza<-paste(pals_5min[grepl('Mzavalagc', pals_5min)], collapse = ' ')
+  pal_gral<-paste(pals_5min, collapse = ' ')
+  
+  pal<-list(pal_gral, pal_amlo, pal_meade, pal_anaya, pal_bronco, pal_maza )
+  
+  
+  pal<-lapply(pal, procesa_corpus)
+  names(pal)<-c('amlo', 'meade', 'bronco', 'anaya', 'margarita')
+  
+  pals_5min<-NULL
+  plots_wd<-list()
+  for (i in 1:length(pal)){
+  pal[[i]]$word<-factor(pal[[i]]$word,
+                        levels = pal[[i]]$word[order(pal[[i]]$freq,
+                                                     decreasing = F)])
+  plots_wd[[i]]<-ggplot(data=pal[[i]][pal[[i]]$freq>quantile(pal[[i]]$freq, 0.90),], aes(x=word, y=freq))+
+    geom_bar(stat = 'identity')+
+    coord_flip()+
+    theme_light()
+  }
+ggsave( filename = 'palabras_5mn.png',device = 'png',plot = 
+            do.call(multiplot, c(plots_wd, cols=2)))  
+  
   message('actuaizando gráficas de 5 minutos...')
   
 plot_menciones<-ggplot(data=data_cons[-1,], aes(x=hora, y=n_tweets))+
@@ -154,8 +258,11 @@ ggsave(path = getwd(),
        plot =  plot_menciones_nort_porc,
        filename = 'plot_menciones_nort_porc.png')
 
-#system('git add .')
-#system("git commit -m 'Actualiación' ")
-#system("git push origin master")
+if (actualiza_git==T){
+system('git add .')
+system("git commit -m 'Actualiación' ")
+system("git push origin master")
+}
+
 }
 }
