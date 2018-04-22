@@ -161,6 +161,7 @@ if (i %%5 ==0){
                                                      decreasing = F)])
   plots_wd[[a]]<-ggplot(data=pal[[a]][pal[[a]]$freq>quantile(pal[[a]]$freq, 0.95),], aes(x=word, y=freq))+
     geom_bar(stat = 'identity')+
+    theme(text = element_text(size = 10))+
     coord_flip()+
     theme_light()+
     xlab('')+
