@@ -29,6 +29,7 @@ procesa_corpus<-function(obj){
   
   
   corpus <- tm_map(corpus, removeWords, stopwords(kind='es'))
+  corpus <- tm_map(corpus, removeWords, '…')
   
   
   
@@ -158,13 +159,13 @@ if (i %%5 ==0){
   pal[[a]]$word<-factor(pal[[a]]$word,
                         levels = pal[[a]]$word[order(pal[[a]]$freq,
                                                      decreasing = F)])
-  plots_wd[[a]]<-ggplot(data=pal[[a]][pal[[a]]$freq>quantile(pal[[a]]$freq, 0.97),], aes(x=word, y=freq))+
+  plots_wd[[a]]<-ggplot(data=pal[[a]][pal[[a]]$freq>quantile(pal[[a]]$freq, 0.99),], aes(x=word, y=freq))+
     geom_bar(stat = 'identity')+
     coord_flip()+
     theme_light()+
     xlab('')+
     ylab('')+
-    ggtitle(paste('Corte de las ', Sys.time() ))
+    ggtitle(paste('Corte de las ',  format(Sys.time(), '%H:%M') ))
   }
 ggsave( filename = 'palabras_5mn.png',device = 'png',plot = 
             do.call(multiplot, c(plots_wd, cols=2)))  
